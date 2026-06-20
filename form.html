@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Inquiry Form</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f5f7fa;
+    padding:30px;
+}
+
+.container{
+    max-width:800px;
+    margin:auto;
+    background:#fff;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 4px 15px rgba(0,0,0,.1);
+}
+
+h2{
+    text-align:center;
+    margin-bottom:25px;
+    color:#333;
+}
+
+.form-group{
+    margin-bottom:15px;
+}
+
+label{
+    display:block;
+    margin-bottom:5px;
+    font-weight:bold;
+}
+
+input,
+textarea{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+
+textarea{
+    resize:vertical;
+    min-height:120px;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    background:#007bff;
+    color:#fff;
+    font-size:16px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0056b3;
+}
+
+.message{
+    margin-top:15px;
+    text-align:center;
+    font-weight:bold;
+}
+
+.required{
+    color:red;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h2>User Information Form</h2>
+
+<form id="userForm">
+
+<div class="form-group">
+<label>Name <span class="required">*</span></label>
+<input type="text" id="name" required>
+</div>
+
+<div class="form-group">
+<label>Designation <span class="required">*</span></label>
+<input type="text" id="designation" required>
+</div>
+
+<div class="form-group">
+<label>Company Name <span class="required">*</span></label>
+<input type="text" id="companyName" required>
+</div>
+
+<div class="form-group">
+<label>Contact No <span class="required">*</span></label>
+<input type="tel" id="contactNo" required>
+</div>
+
+<div class="form-group">
+<label>Secondary Contact No</label>
+<input type="tel" id="secondaryContactNo">
+</div>
+
+<div class="form-group">
+<label>Email <span class="required">*</span></label>
+<input type="email" id="email" required>
+</div>
+
+<div class="form-group">
+<label>Website</label>
+<input type="url" id="website">
+</div>
+
+<div class="form-group">
+<label>Inquiry / Query / Description</label>
+<textarea id="description"></textarea>
+</div>
+
+<div class="form-group">
+<label>Attachment</label>
+<input type="file" id="attachment">
+</div>
+
+<button type="submit">Submit</button>
+
+<div class="message" id="message"></div>
+
+</form>
+
+</div>
+
+<script>
+
+const SCRIPT_URL =
+"https://script.google.com/macros/s/YOUR_GOOGLE_SCRIPT_URL/exec";
+
+document.getElementById("userForm")
+.addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+    const message = document.getElementById("message");
+    message.innerHTML = "Submitting...";
+
+    const fileInput = document.getElementById("attachment");
+
+    let fileData = "";
+    let fileName = "";
+    let fileType = "";
+
+    if(fileInput.files.length > 0){
+
+        const file = fileInput.files[0];
+
+        fileName = file.name;
+        fileType = file.type;
+
+        fileData = await toBase64(file);
+        fileData = fileData.split(",")[1];
+    }
+
+    const payload = {
+        name: document.getElementById("name").value,
+        designation: document.getElementById("designation").value,
+        companyName: document.getElementById("companyName").value,
+        contactNo: document.getElementById("contactNo").value,
+        secondaryContactNo:
+          document.getElementById("secondaryContactNo").value,
+        email: document.getElementById("email").value,
+        website: document.getElementById("website").value,
+        description: document.getElementById("description").value,
+        fileName,
+        fileType,
+        fileData
+    };
+
+    try{
+
+        const response = await fetch(SCRIPT_URL,{
+            method:"POST",
+            body:JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if(result.status === "success"){
+            message.style.color = "green";
+            message.innerHTML =
+              "Information submitted successfully.";
+
+            document.getElementById("userForm").reset();
+        }
+        else{
+            throw new Error(result.message);
+        }
+
+    }catch(error){
+
+        message.style.color = "red";
+        message.innerHTML =
+          "Submission failed. Please try again.";
+
+        console.error(error);
+    }
+
+});
+
+function toBase64(file){
+    return new Promise((resolve,reject)=>{
+
+        const reader = new FileReader();
+
+        reader.readAsDataURL(file);
+
+        reader.onload = () => resolve(reader.result);
+
+        reader.onerror = error => reject(error);
+
+    });
+}
+
+</script>
+
+</body>
+</html>
