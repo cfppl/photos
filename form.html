@@ -191,34 +191,29 @@ document.getElementById("userForm")
         fileData
     };
 
-    try{
+   try{
 
-        const response = await fetch(SCRIPT_URL,{
-            method:"POST",
-            body:JSON.stringify(payload)
-        });
+await fetch(SCRIPT_URL,{
+    method:"POST",
+    mode:"no-cors",
+    body:JSON.stringify(payload)
+});
 
-        const result = await response.json();
+message.style.color = "green";
+message.innerHTML =
+  "Information submitted successfully.";
 
-        if(result.status === "success"){
-            message.style.color = "green";
-            message.innerHTML =
-              "Information submitted successfully.";
+document.getElementById("userForm").reset();
 
-            document.getElementById("userForm").reset();
-        }
-        else{
-            throw new Error(result.message);
-        }
+}catch(error){
 
-    }catch(error){
+message.style.color = "red";
+message.innerHTML =
+  "Submission failed. Please try again.";
 
-        message.style.color = "red";
-        message.innerHTML =
-          "Submission failed. Please try again.";
+console.error(error);
 
-        console.error(error);
-    }
+}
 
 });
 
