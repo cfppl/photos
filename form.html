@@ -125,7 +125,7 @@ button:hover{
 
 <div class="form-group">
 <label>Website</label>
-<input type="url" id="website">
+<input type="text" id="website">
 </div>
 
 <div class="form-group">
@@ -138,7 +138,9 @@ button:hover{
 <input type="file" id="attachment">
 </div>
 
+<img id="myImage" src="https://raw.githubusercontent.com/cfppl/photos/d462f9d87212441167f11578302df0c4ce72a0c8/logo_paresh.jpg" >
 <button type="submit">Submit</button>
+
 
 <div class="message" id="message"></div>
 
@@ -150,6 +152,12 @@ button:hover{
 
 const SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbxXEJVDo9uG65NFHzJaudeB4ehSx5sj9D-c1jmdFWY5EHojdDDi1WZ3lVdXHYjlPIyk/exec";
+
+
+const img = document.getElementById('myImage');
+    img.style.display = "none";
+
+
 
 document.getElementById("userForm")
 .addEventListener("submit", async function(e){
@@ -191,6 +199,12 @@ document.getElementById("userForm")
         fileData
     };
 
+console.log("File Name:", fileName);
+console.log("File Type:", fileType);
+console.log("File Data Length:", fileData.length);
+console.log(payload);
+
+
    try{
 
 await fetch(SCRIPT_URL,{
@@ -203,7 +217,23 @@ message.style.color = "green";
 message.innerHTML =
   "Information submitted successfully.";
 
-document.getElementById("userForm").reset();
+
+ const res = await fetch(img.src);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');  
+    link.href=url;
+    link.download = 'CFPPL_card.jpg';
+    document.body.appendChild(link);
+    link.click();
+    
+    // 4. Cleanup
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+
+
 
 }catch(error){
 
@@ -230,6 +260,7 @@ function toBase64(file){
 
     });
 }
+
 
 </script>
 
